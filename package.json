@@ -1,0 +1,26 @@
+{
+  "name": "quiche-nwep",
+  "description": "nwep patches for quiche",
+  "authors": [
+    "trifledmatter",
+    "cloudflare"
+  ],
+  "homepage": "https://github.com/usenwep/quiche-nwep",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/usenwep/quiche-nwep.git"
+  },
+  "license": "BSD-2-Clause",
+  "keywords": [
+    "quic",
+    "nwep",
+    "web",
+    "protocol"
+  ],
+  "categories": [
+    "network-programming"
+  ],
+  "scripts": {
+    "prepare": "tsx scripts/prepare.ts"
+  }
+}

@@ -1,0 +1,11 @@
+Welcome to NWEP!
+
+This is the New Web Exchange Protocol - a human-readable alternative to HTTP/3.
+
+Key Features:
+- Text status tokens (ok, not_found) instead of numeric codes (200, 404)
+- Minimal method set: READ, WRITE, MODIFY, DELETE, PROBE, CONNECT, TRACE
+- Built on QUIC for modern transport
+- Human-inspectable protocol design
+
+This file was served using the NWEP/1 protocol!
