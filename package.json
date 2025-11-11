@@ -1,5 +1,6 @@
 {
   "name": "quiche-nwep",
+  "version": "1.0.0",
   "description": "nwep patches for quiche",
   "authors": [
     "trifledmatter",
@@ -20,7 +21,29 @@
   "categories": [
     "network-programming"
   ],
+  "type": "module",
   "scripts": {
-    "prepare": "tsx scripts/prepare.ts"
+    "pre": "tsx scripts/prepare.ts",
+    "build": "tsx scripts/build.ts",
+    "build:native": "cargo build --release --features ffi,qlog --workspace",
+    "build:windows": "cross build --release --target x86_64-pc-windows-gnu --features ffi",
+    "build:android": "docker build -f Dockerfile.android --build-arg ANDROID_TARGET=aarch64-linux-android --build-arg CARGO_FEATURES=ffi -t quiche-nwep-android .",
+    "package": "./scripts/package-releases.sh",
+    "commit": "tsx scripts/commit.ts",
+    "check-deps": "./scripts/check-deps.sh",
+    "test": "cargo test --verbose --all-targets --features ffi,qlog --workspace",
+    "lint": "cargo clippy --workspace --all-targets --features ffi,qlog",
+    "fmt": "cargo fmt --all -- --check",
+    "fmt:fix": "cargo fmt --all"
+  },
+  "devDependencies": {
+    "@clack/prompts": "^0.7.0",
+    "@types/node": "^20.10.0",
+    "colorette": "^2.0.20",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

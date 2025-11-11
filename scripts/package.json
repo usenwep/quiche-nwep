@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "prepare": "tsx prepare.ts"
+    "pre": "tsx prepare.ts"
   },
   "dependencies": {
     "chalk": "^5.3.0",

@@ -1,0 +1,128 @@
+# Android Build Environment for NWEP (New Web Exchange Protocol)
+# Copyright (C) 2025, Ethan Pelletier
+# All rights reserved.
+#
+# This Dockerfile provides a complete Android cross-compilation environment
+# for building quiche-nwep for Android targets.
+
+FROM rust:1.85-slim
+
+# Android NDK version
+ARG ANDROID_NDK_VERSION=26.1.10909125
+ARG ANDROID_API_LEVEL=24
+ARG ANDROID_HOME=/opt/android-sdk
+
+# Install base dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    pkg-config \
+    wget \
+    unzip \
+    openjdk-17-jdk \
+    clang \
+    libclang-dev \
+    python3 \
+    ninja-build \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Android SDK Command Line Tools
+RUN mkdir -p ${ANDROID_HOME}/cmdline-tools && \
+    cd ${ANDROID_HOME}/cmdline-tools && \
+    wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip && \
+    unzip -q commandlinetools-linux-11076708_latest.zip && \
+    rm commandlinetools-linux-11076708_latest.zip && \
+    mv cmdline-tools latest
+
+# Set environment variables for Android SDK
+ENV ANDROID_HOME=${ANDROID_HOME}
+ENV ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/${ANDROID_NDK_VERSION}
+ENV PATH=${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools
+
+# Accept licenses and install NDK
+RUN yes | sdkmanager --licenses || true
+RUN sdkmanager "ndk;${ANDROID_NDK_VERSION}" "platform-tools" "platforms;android-${ANDROID_API_LEVEL}"
+
+# Install Rust Android targets
+RUN rustup target add \
+    aarch64-linux-android \
+    armv7-linux-androideabi \
+    x86_64-linux-android \
+    i686-linux-android
+
+# Set up Cargo config for Android cross-compilation
+RUN mkdir -p /root/.cargo && \
+    echo '[target.aarch64-linux-android]' > /root/.cargo/config.toml && \
+    echo "ar = \"${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar\"" >> /root/.cargo/config.toml && \
+    echo "linker = \"${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android${ANDROID_API_LEVEL}-clang\"" >> /root/.cargo/config.toml && \
+    echo '' >> /root/.cargo/config.toml && \
+    echo '[target.armv7-linux-androideabi]' >> /root/.cargo/config.toml && \
+    echo "ar = \"${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar\"" >> /root/.cargo/config.toml && \
+    echo "linker = \"${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi${ANDROID_API_LEVEL}-clang\"" >> /root/.cargo/config.toml && \
+    echo '' >> /root/.cargo/config.toml && \
+    echo '[target.x86_64-linux-android]' >> /root/.cargo/config.toml && \
+    echo "ar = \"${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar\"" >> /root/.cargo/config.toml && \
+    echo "linker = \"${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android${ANDROID_API_LEVEL}-clang\"" >> /root/.cargo/config.toml && \
+    echo '' >> /root/.cargo/config.toml && \
+    echo '[target.i686-linux-android]' >> /root/.cargo/config.toml && \
+    echo "ar = \"${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar\"" >> /root/.cargo/config.toml && \
+    echo "linker = \"${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android${ANDROID_API_LEVEL}-clang\"" >> /root/.cargo/config.toml
+
+# Set environment variables for BoringSSL cross-compilation
+ENV CC_aarch64_linux_android=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android${ANDROID_API_LEVEL}-clang
+ENV CXX_aarch64_linux_android=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android${ANDROID_API_LEVEL}-clang++
+ENV AR_aarch64_linux_android=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
+ENV CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android${ANDROID_API_LEVEL}-clang
+
+ENV CC_armv7_linux_androideabi=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi${ANDROID_API_LEVEL}-clang
+ENV CXX_armv7_linux_androideabi=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi${ANDROID_API_LEVEL}-clang++
+ENV AR_armv7_linux_androideabi=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
+ENV CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi${ANDROID_API_LEVEL}-clang
+
+ENV CC_x86_64_linux_android=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android${ANDROID_API_LEVEL}-clang
+ENV CXX_x86_64_linux_android=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android${ANDROID_API_LEVEL}-clang++
+ENV AR_x86_64_linux_android=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
+ENV CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android${ANDROID_API_LEVEL}-clang
+
+ENV CC_i686_linux_android=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android${ANDROID_API_LEVEL}-clang
+ENV CXX_i686_linux_android=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android${ANDROID_API_LEVEL}-clang++
+ENV AR_i686_linux_android=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
+ENV CARGO_TARGET_I686_LINUX_ANDROID_LINKER=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android${ANDROID_API_LEVEL}-clang
+
+# Set working directory
+WORKDIR /nwep
+
+# Copy the entire project
+COPY . .
+
+# Initialize git submodules (for BoringSSL)
+RUN git submodule update --init --recursive || true
+
+# Build argument for target architecture (default: aarch64)
+ARG ANDROID_TARGET=aarch64-linux-android
+
+# Build argument for cargo features
+ARG CARGO_FEATURES="ffi"
+
+# Build the project for the specified Android target
+RUN cargo build --release --target ${ANDROID_TARGET} --features ${CARGO_FEATURES}
+
+# Create output directory with all built libraries
+RUN mkdir -p /output && \
+    find target -name "*.so" -o -name "*.a" | xargs -I {} cp {} /output/ || true
+
+# Default command shows build info
+CMD ["bash", "-c", "echo 'NWEP Android Build Environment' && \
+     echo 'NDK Version: ${ANDROID_NDK_VERSION}' && \
+     echo 'API Level: ${ANDROID_API_LEVEL}' && \
+     echo '' && \
+     echo 'Available targets:' && \
+     echo '  - aarch64-linux-android (ARM64)' && \
+     echo '  - armv7-linux-androideabi (ARM32)' && \
+     echo '  - x86_64-linux-android (x86_64)' && \
+     echo '  - i686-linux-android (x86)' && \
+     echo '' && \
+     echo 'Built libraries in /output:' && \
+     ls -lh /output/ && \
+     bash"]

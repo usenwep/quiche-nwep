@@ -1,0 +1,47 @@
+# Cross-compilation configuration for cross-rs
+# https://github.com/cross-rs/cross
+#
+# Note: BoringSSL requires NASM assembler for Windows builds
+
+[build]
+# Use pre-built cross images with necessary dependencies
+
+[build.env]
+passthrough = [
+    "RUST_LOG",
+    "CARGO_PROFILE_RELEASE_LTO",
+    "CARGO_PROFILE_RELEASE_CODEGEN_UNITS",
+]
+
+# Windows x86_64 GNU target
+[target.x86_64-pc-windows-gnu]
+# Install NASM for BoringSSL assembly code
+pre-build = [
+    "dpkg --add-architecture amd64",
+    "apt-get update",
+    "apt-get install -y nasm",
+]
+
+# Windows x86_64 MSVC target
+[target.x86_64-pc-windows-msvc]
+pre-build = [
+    "apt-get update",
+    "apt-get install -y nasm",
+]
+
+# Linux ARM64 (useful for ARM servers, Raspberry Pi)
+[target.aarch64-unknown-linux-gnu]
+# Default image has gcc, cmake, and all build tools pre-installed
+
+# Linux ARM v7 (Raspberry Pi 2/3/4 in 32-bit mode)
+[target.armv7-unknown-linux-gnueabihf]
+# Default image has gcc, cmake, and all build tools pre-installed
+
+# macOS targets (requires macOS host or osxcross)
+[target.x86_64-apple-darwin]
+# Note: Building for macOS typically requires a macOS host
+# or specialized cross-compilation setup with osxcross
+
+[target.aarch64-apple-darwin]
+# Apple Silicon / M1/M2/M3 Macs
+# Requires macOS host or osxcross
