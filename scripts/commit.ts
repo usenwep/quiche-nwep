@@ -423,6 +423,48 @@ async function main() {
   if (shouldPush) {
     const currentBranch = exec('git branch --show-current');
 
+    // Check if origin remote exists
+    const remotes = exec('git remote');
+    if (!remotes.includes('origin')) {
+      log.warn(yellow('No "origin" remote configured.'));
+
+      const addRemote = await confirm({
+        message: 'Would you like to add the origin remote now?',
+        initialValue: true,
+      });
+
+      if (isCancel(addRemote) || !addRemote) {
+        outro(green('✓ Commit created locally (not pushed)'));
+        process.exit(0);
+      }
+
+      const remoteUrl = await text({
+        message: 'Enter the remote URL:',
+        placeholder: 'https://github.com/usenwep/quiche-nwep.git',
+        validate: (value) => {
+          if (!value || value.length < 5) {
+            return 'Please enter a valid URL';
+          }
+        },
+      });
+
+      if (isCancel(remoteUrl)) {
+        outro(green('✓ Commit created locally (not pushed)'));
+        process.exit(0);
+      }
+
+      const addSpinner = spinner();
+      addSpinner.start('Adding origin remote...');
+      try {
+        exec(`git remote add origin "${remoteUrl}"`);
+        addSpinner.stop(green('✓ Remote added'));
+      } catch (error) {
+        addSpinner.stop(red('✗ Failed to add remote'));
+        outro(yellow('⚠ Commit created locally but remote not configured'));
+        process.exit(0);
+      }
+    }
+
     note(
       `Branch: ${cyan(currentBranch)}\n` +
       `Remote: ${cyan('origin')}`,
@@ -453,9 +495,22 @@ async function main() {
         exec('git push --tags', false);
         pushTagSpinner.stop(green('✓ Tags pushed'));
       }
-    } catch (error) {
+    } catch (error: any) {
       pushSpinner.stop(red('✗ Failed to push'));
-      throw error;
+
+      // Check if it's an authentication or network error
+      const errorMsg = error.message || '';
+      if (errorMsg.includes('Permission denied') || errorMsg.includes('authentication')) {
+        log.error(red('Authentication failed. You may need to:'));
+        log.info('  • Set up SSH keys: https://docs.github.com/en/authentication/connecting-to-github-with-ssh');
+        log.info('  • Use a personal access token for HTTPS');
+        log.info('  • Configure git credentials');
+      } else if (errorMsg.includes('Could not resolve host')) {
+        log.error(red('Network error. Check your internet connection.'));
+      }
+
+      outro(yellow('⚠ Commit and tag created locally but not pushed'));
+      process.exit(1);
     }
   }
 

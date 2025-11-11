@@ -23,13 +23,14 @@
   ],
   "type": "module",
   "scripts": {
-    "pre": "tsx scripts/prepare.ts",
+    "workflow": "tsx scripts/workflow.ts",
     "build": "tsx scripts/build.ts",
     "build:native": "cargo build --release --features ffi,qlog --workspace",
     "build:windows": "cross build --release --target x86_64-pc-windows-gnu --features ffi",
     "build:android": "docker build -f Dockerfile.android --build-arg ANDROID_TARGET=aarch64-linux-android --build-arg CARGO_FEATURES=ffi -t quiche-nwep-android .",
     "package": "./scripts/package-releases.sh",
     "commit": "tsx scripts/commit.ts",
+    "release": "tsx scripts/release.ts",
     "check-deps": "./scripts/check-deps.sh",
     "test": "cargo test --verbose --all-targets --features ffi,qlog --workspace",
     "lint": "cargo clippy --workspace --all-targets --features ffi,qlog",
@@ -39,7 +40,10 @@
   "devDependencies": {
     "@clack/prompts": "^0.7.0",
     "@types/node": "^20.10.0",
+    "@types/tar": "^6.1.13",
+    "archiver": "^7.0.1",
     "colorette": "^2.0.20",
+    "tar": "^7.5.2",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3"
   },

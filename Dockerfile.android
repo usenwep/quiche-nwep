@@ -106,7 +106,8 @@ ARG ANDROID_TARGET=aarch64-linux-android
 ARG CARGO_FEATURES="ffi"
 
 # Build the project for the specified Android target
-RUN cargo build --release --target ${ANDROID_TARGET} --features ${CARGO_FEATURES}
+# Only build quiche crate (exclude qlog-dancer which has fontconfig dependencies)
+RUN cargo build --release --target ${ANDROID_TARGET} --package quiche --features ${CARGO_FEATURES}
 
 # Create output directory with all built libraries
 RUN mkdir -p /output && \

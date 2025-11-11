@@ -50,7 +50,7 @@ const PLATFORMS: Platform[] = [
     target: 'x86_64-pc-windows-gnu',
     requiresCross: true,
     buildCommand: (opts) =>
-      `cross build ${opts.mode === 'release' ? '--release' : ''} --target x86_64-pc-windows-gnu --features ${opts.features.join(',')}`,
+      `cross build ${opts.mode === 'release' ? '--release' : ''} --target x86_64-pc-windows-gnu --package quiche --features ${opts.features.join(',')}`,
   },
   {
     id: 'windows-x64-msvc',
@@ -59,7 +59,7 @@ const PLATFORMS: Platform[] = [
     target: 'x86_64-pc-windows-msvc',
     requiresCross: true,
     buildCommand: (opts) =>
-      `cross build ${opts.mode === 'release' ? '--release' : ''} --target x86_64-pc-windows-msvc --features ${opts.features.join(',')}`,
+      `cross build ${opts.mode === 'release' ? '--release' : ''} --target x86_64-pc-windows-msvc --package quiche --features ${opts.features.join(',')}`,
   },
 
   // Android
@@ -70,7 +70,7 @@ const PLATFORMS: Platform[] = [
     target: 'aarch64-linux-android',
     requiresDocker: true,
     buildCommand: (opts) =>
-      `docker build -f Dockerfile.android --build-arg ANDROID_TARGET=aarch64-linux-android --build-arg CARGO_FEATURES=${opts.features.join(',')} -t quiche-nwep-android-arm64 .`,
+      `docker build -f Dockerfile.android --build-arg ANDROID_TARGET=aarch64-linux-android --build-arg CARGO_FEATURES=${opts.features.filter(f => f !== 'sfv').join(',')} -t quiche-nwep-android-arm64 .`,
   },
   {
     id: 'android-arm32',
@@ -79,7 +79,7 @@ const PLATFORMS: Platform[] = [
     target: 'armv7-linux-androideabi',
     requiresDocker: true,
     buildCommand: (opts) =>
-      `docker build -f Dockerfile.android --build-arg ANDROID_TARGET=armv7-linux-androideabi --build-arg CARGO_FEATURES=${opts.features.join(',')} -t quiche-nwep-android-arm32 .`,
+      `docker build -f Dockerfile.android --build-arg ANDROID_TARGET=armv7-linux-androideabi --build-arg CARGO_FEATURES=${opts.features.filter(f => f !== 'sfv').join(',')} -t quiche-nwep-android-arm32 .`,
   },
   {
     id: 'android-x64',
@@ -88,7 +88,7 @@ const PLATFORMS: Platform[] = [
     target: 'x86_64-linux-android',
     requiresDocker: true,
     buildCommand: (opts) =>
-      `docker build -f Dockerfile.android --build-arg ANDROID_TARGET=x86_64-linux-android --build-arg CARGO_FEATURES=${opts.features.join(',')} -t quiche-nwep-android-x64 .`,
+      `docker build -f Dockerfile.android --build-arg ANDROID_TARGET=x86_64-linux-android --build-arg CARGO_FEATURES=${opts.features.filter(f => f !== 'sfv').join(',')} -t quiche-nwep-android-x64 .`,
   },
   {
     id: 'android-x86',
@@ -97,7 +97,7 @@ const PLATFORMS: Platform[] = [
     target: 'i686-linux-android',
     requiresDocker: true,
     buildCommand: (opts) =>
-      `docker build -f Dockerfile.android --build-arg ANDROID_TARGET=i686-linux-android --build-arg CARGO_FEATURES=${opts.features.join(',')} -t quiche-nwep-android-x86 .`,
+      `docker build -f Dockerfile.android --build-arg ANDROID_TARGET=i686-linux-android --build-arg CARGO_FEATURES=${opts.features.filter(f => f !== 'sfv').join(',')} -t quiche-nwep-android-x86 .`,
   },
 
   // Linux ARM
@@ -108,7 +108,7 @@ const PLATFORMS: Platform[] = [
     target: 'aarch64-unknown-linux-gnu',
     requiresCross: true,
     buildCommand: (opts) =>
-      `cross build ${opts.mode === 'release' ? '--release' : ''} --target aarch64-unknown-linux-gnu --features ${opts.features.join(',')}`,
+      `cross build ${opts.mode === 'release' ? '--release' : ''} --target aarch64-unknown-linux-gnu --package quiche --features ${opts.features.join(',')}`,
   },
   {
     id: 'linux-armv7',
@@ -117,7 +117,7 @@ const PLATFORMS: Platform[] = [
     target: 'armv7-unknown-linux-gnueabihf',
     requiresCross: true,
     buildCommand: (opts) =>
-      `cross build ${opts.mode === 'release' ? '--release' : ''} --target armv7-unknown-linux-gnueabihf --features ${opts.features.join(',')}`,
+      `cross build ${opts.mode === 'release' ? '--release' : ''} --target armv7-unknown-linux-gnueabihf --package quiche --features ${opts.features.join(',')}`,
   },
 
   // Native

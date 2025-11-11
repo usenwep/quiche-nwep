@@ -2,11 +2,28 @@
 **/*.rs.bk
 **/Cargo.lock
 **/*.*qlog
-**/*.md
 doc/
 .claude/
 .directory
 **/node_modules
 **/dist
 **/build
-**/release
+
+# NPM/Node
+package-lock.json
+yarn.lock
+.npm
+.yarn
+
+# Build artifacts (temporary)
+android-libs/
+target/android-output/
+dist/
+
+# Release temporary files
+.release-notes.md
+.release-notes-temp.md
+
+CLAUDE.md
+**/*.md
+*.md
